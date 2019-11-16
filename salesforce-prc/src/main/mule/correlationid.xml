@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd">
+	<flow name="cf-correlation-id" doc:id="8a1bddb4-8d33-445a-91c7-2dc8db3ddd9e" >
+		<ee:transform doc:name="DW Set correaltionId" doc:id="38c4076f-661e-4c6b-9a6c-aa7dfd56860a" >
+			<ee:message >
+			</ee:message>
+			<ee:variables >
+				<ee:set-variable variableName="correlationId" ><![CDATA[%dw 2.0
+output application/java
+---
+if(attributes.headers['xh-transaction-id'] != null)(
+    attributes.headers['xh-transaction-id']
+)
+else (correlationId)]]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+	</flow></mule>

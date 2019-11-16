@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd">
+	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="f7e5c9ee-4e6a-4e8b-ab70-6a77becafcc9" >
+		<http:listener-connection host="0.0.0.0" port="9091" />
+	</http:listener-config>
+	<flow name="salesforce-prcFlow" doc:id="0b9b48db-e745-435e-b15b-ad986016d170" >
+		<http:listener doc:name="Listener" doc:id="46d5c72b-a66c-4fcc-ba89-41b5a3525def" config-ref="HTTP_Listener_config" path="/process"/>
+		<logger level="INFO" doc:name="LOG INFO Start Process" doc:id="284628c8-6dfe-410c-b8ad-94fafad48c1b" message="Starting Process Layer With CorrelationId #[vars.correlationId]"/>
+		<choice doc:name="Choice" doc:id="59f47e4c-2eb1-4d4a-b068-bb3c01343f93" >
+			<when expression="#[attributes.headers.&quot;xh-operation&quot;=='insert' or attributes.headers.&quot;xh-operation&quot;=='upsert' or attributes.headers.&quot;xh-operation&quot;=='get']">
+				<http:request method="POST" doc:name="Request" doc:id="3be27a0d-9429-4d1e-9d9a-a3472afbdd19" path="api/sf/{operations}" config-ref="HTTP_Request_configuration">
+					<http:uri-params ><![CDATA[#[output application/java
+---
+{
+	"operation" : attributes.headers."xh-operation"
+}]]]></http:uri-params>
+				</http:request>
+			</when>
+			<otherwise >
+				<logger level="INFO" doc:name="Logger" doc:id="5ef60f6d-3d9b-4331-b468-40c602512470" message="Not an Valid Operation"/>
+			</otherwise>
+		</choice>
+		<logger level="INFO" doc:name="LOG INFO End Process" doc:id="912c266d-6635-4393-8712-df84835dedb1" message="Ending Process Layer With CorrelationId #[vars.correlationId]"/>
+	</flow>
+</mule>
